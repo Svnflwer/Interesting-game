@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Угадай число</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            box-shadow: 0 0 40px rgba(100, 150, 255, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #a0a0c0;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .info span {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid rgba(100, 150, 255, 0.4);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            background: linear-gradient(90deg, #00c853, #00e676);
+            box-shadow: 0 0 20px rgba(0, 200, 83, 0.5);
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+        }
+
+        .message {
+            font-size: 18px;
+            min-height: 30px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .win { color: #00e676; }
+        .lose { color: #ff5252; }
+        .hint { color: #ffb74d; }
+
+        .restart-btn {
+            background: linear-gradient(90deg, #ff9800, #ffb74d) !important;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.5) !important;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 УГАДАЙ ЧИСЛО</h1>
+        <p class="subtitle">Я загадал число от 1 до 100</p>
+
+        <div class="info">
+            <div>Попытки: <span id="attempts">7</span></div>
+            <div>Раунд: <span id="round">1</span></div>
+        </div>
+
+        <input type="number" id="guessInput" placeholder="Введи число" min="1" max="100">
+        <button id="checkBtn" onclick="checkGuess()">ПРОВЕРИТЬ</button>
+        <button class="restart-btn" id="restartBtn" onclick="restartGame()">🔄 ИГРАТЬ ЗАНОВО</button>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        let secretNumber = Math.floor(Math.random() * 100) + 1;
+        let attemptsLeft = 7;
+        let round = 1;
+
+        function checkGuess() {
+            const input = document.getElementById('guessInput');
+            const message = document.getElementById('message');
+            const guess = parseInt(input.value);
+
+            if (!guess || guess < 1 || guess > 100) {
+                message.textContent = "Введи число от 1 до 100!";
+                message.className = "message hint";
+                return;
+            }
+
+            attemptsLeft--;
+            document.getElementById('attempts').textContent = attemptsLeft;
+
+            if (guess === secretNumber) {
+                message.textContent = "🎉 УГАДАЛ! Ты победил!";
+                message.className = "message win";
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('restartBtn').style.display = "block";
+                return;
+            } else if (guess < secretNumber) {
+                message.textContent = "📈 Больше!";
+                message.className = "message hint";
+            } else {
+                message.textContent = "📉 Меньше!";
+                message.className = "message hint";
+            }
+
+            if (attemptsLeft <= 0) {
+                message.textContent = "❌ Попытки закончились! Было число: " + secretNumber;
+                message.className = "message lose";
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('restartBtn').style.display = "block";
+            }
+
+            input.value = "";
+        }
+
+        function restartGame() {
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            attemptsLeft = 7;
+            round++;
+
+            document.getElementById('attempts').textContent = attemptsLeft;
+            document.getElementById('round').textContent = round;
+            document.getElementById('message').textContent = "";
+            document.getElementById('message').className = "message";
+            document.getElementById('guessInput').value = "";
+            document.getElementById('checkBtn').disabled = false;
+            document.getElementById('restartBtn').style.display = "none";
+        }
+
+        document.getElementById('guessInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkGuess();
+            }
+        });
+    </script>
+</body>
+</html>
