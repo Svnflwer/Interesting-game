@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мозговой Вызов</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            color: white; padding: 20px;
+        }
+        .container {
+            text-align: center; padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px; border: 2px solid rgba(100, 150, 255, 0.3);
+            box-shadow: 0 0 40px rgba(100, 150, 255, 0.2);
+            max-width: 400px; width: 100%;
+        }
+        h1 {
+            font-size: 24px; margin-bottom: 15px;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab {
+            flex: 1; padding: 10px; font-size: 13px; font-weight: bold;
+            border: none; border-radius: 10px; cursor: pointer;
+            background: rgba(255,255,255,0.1); color: #a0a0c0;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            background: linear-gradient(90deg, #00c853, #00e676);
+            color: white; box-shadow: 0 0 15px rgba(0, 200, 83, 0.5);
+        }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .subtitle { font-size: 13px; color: #a0a0c0; margin-bottom: 15px; }
+        .info {
+            display: flex; justify-content: space-between;
+            margin-bottom: 15px; font-size: 15px;
+        }
+        .info span { color: #00d4ff; font-weight: bold; }
+        input {
+            width: 100%; padding: 12px; font-size: 20px; text-align: center;
+            border: 2px solid rgba(100, 150, 255, 0.4); border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3); color: white;
+            margin-bottom: 15px; outline: none;
+        }
+        input:focus { border-color: #00d4ff; box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
+        button.action {
+            width: 100%; padding: 14px; font-size: 17px; font-weight: bold;
+            border: none; border-radius: 10px; cursor: pointer;
+            color: white; margin-bottom: 10px;
+            background: linear-gradient(90deg, #00c853, #00e676);
+            box-shadow: 0 0 20px rgba(0, 200, 83, 0.5);
+            transition: all 0.3s ease;
+        }
+        button.action:hover { transform: scale(1.03); }
+        .message {
+            font-size: 16px; min-height: 26px; margin-top: 10px; font-weight: bold;
+        }
+        .win { color: #00e676; }
+        .lose { color: #ff5252; }
+        .hint { color: #ffb74d; }
+        .restart-btn {
+            background: linear-gradient(90deg, #ff9800, #ffb74d) !important;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.5) !important;
+            display: none;
+        }
+        .grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 10px; margin-bottom: 20px;
+        }
+        .color-btn {
+            width: 100%; aspect-ratio: 1; border-radius: 15px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer; transition: all 0.3s ease; opacity: 0.5;
+        }
+        .color-btn.active {
+            opacity: 1; transform: scale(1.05); box-shadow: 0 0 25px currentColor;
+        }
+        .color-btn:disabled { cursor: not-allowed; }
+        #red { background: #ff5252; color: #ff5252; }
+        #blue { background: #448aff; color: #448aff; }
+        #green { background: #00e676; color: #00e676; }
+        #yellow { background: #ffd740; color: #ffd740; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 МОЗГОВОЙ ВЫЗОВ</h1>
+
+        <div class="tabs">
+            <button class="tab active" id="tabNumber" onclick="switchTab('number')">🎯 ЧИСЛО</button>
+            <button class="tab" id="tabMemory" onclick="switchTab('memory')">🎨 ПАМЯТЬ</button>
+        </div>
+
+        <!-- ИГРА 1: УГАДАЙ ЧИСЛО -->
+        <div class="panel active" id="panelNumber">
+            <p class="subtitle">Я загадал число от 1 до 100</p>
+            <div class="info">
+                <div>Попытки: <span id="attempts">7</span></div>
+                <div>Раунд: <span id="round">1</span></div>
+            </div>
+            <input type="number" id="guessInput" placeholder="Введи число" min="1" max="100">
+            <button class="action" id="checkBtn" onclick="checkGuess()">ПРОВЕРИТЬ</button>
+            <button class="action restart-btn" id="restartNumBtn" onclick="restartNumber()">🔄 ИГРАТЬ ЗАНОВО</button>
+            <div class="message" id="numMessage"></div>
+        </div>
+
+        <!-- ИГРА 2: ЦВЕТНАЯ ПАМЯТЬ -->
+        <div class="panel" id="panelMemory">
+            <p class="subtitle">Запомни порядок цветов и повтори!</p>
+            <div class="info">
+                <div>Уровень: <span id="level">1</span></div>
+                <div>Рекорд: <span id="record">0</span></div>
+            </div>
+            <div class="grid">
+                <button class="color-btn" id="red" onclick="handleColor('red')"></button>
+                <button class="color-btn" id="blue" onclick="handleColor('blue')"></button>
+                <button class="color-btn" id="green" onclick="handleColor('green')"></button>
+                <button class="color-btn" id="yellow" onclick="handleColor('yellow')"></button>
+            </div>
+            <button class="action" id="startMemBtn" onclick="startMemory()">▶️ НАЧАТЬ</button>
+            <button class="action restart-btn" id="restartMemBtn" onclick="startMemory()">🔄 ИГРАТЬ ЗАНОВО</button>
+            <div class="message" id="memMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // === ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ===
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            if (tab === 'number') {
+                document.getElementById('tabNumber').classList.add('active');
+                document.getElementById('panelNumber').classList.add('active');
+            } else {
+                document.getElementById('tabMemory').classList.add('active');
+                document.getElementById('panelMemory').classList.add('active');
+            }
+        }
+
+        // === ИГРА 1: УГАДАЙ ЧИСЛО ===
+        let secretNumber = Math.floor(Math.random() * 100) + 1;
+        let attemptsLeft = 7;
+        let round = 1;
+
+        function checkGuess() {
+            const input = document.getElementById('guessInput');
+            const message = document.getElementById('numMessage');
+            const guess = parseInt(input.value);
+
+            if (!guess || guess < 1 || guess > 100) {
+                message.textContent = "Введи число от 1 до 100!";
+                message.className = "message hint";
+                return;
+            }
+
+            attemptsLeft--;
+            document.getElementById('attempts').textContent = attemptsLeft;
+
+            if (guess === secretNumber) {
+                message.textContent = "🎉 УГАДАЛ! Ты победил!";
+                message.className = "message win";
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('restartNumBtn').style.display = "block";
+                return;
+            } else if (guess < secretNumber) {
+                message.textContent = "📈 Больше!";
+                message.className = "message hint";
+            } else {
+                message.textContent = "📉 Меньше!";
+                message.className = "message hint";
+            }
+
+            if (attemptsLeft <= 0) {
+                message.textContent = "❌ Попытки закончились! Было число: " + secretNumber;
+                message.className = "message lose";
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('restartNumBtn').style.display = "block";
+            }
+            input.value = "";
+        }
+
+        function restartNumber() {
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            attemptsLeft = 7;
+            round++;
+            document.getElementById('attempts').textContent = attemptsLeft;
+            document.getElementById('round').textContent = round;
+            document.getElementById('numMessage').textContent = "";
+            document.getElementById('numMessage').className = "message";
+            document.getElementById('guessInput').value = "";
+            document.getElementById('checkBtn').disabled = false;
+            document.getElementById('restartNumBtn').style.display = "none";
+        }
+
+        document.getElementById('guessInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkGuess();
+        });
+
+        // === ИГРА 2: ЦВЕТНАЯ ПАМЯТЬ ===
+        const colors = ['red', 'blue', 'green', 'yellow'];
+        let sequence = [];
+        let playerSeq = [];
+        let level = 1;
+        let record = 0;
+        let canClick = false;
+
+        function startMemory() {
+            sequence = []; playerSeq = []; level = 1;
+            document.getElementById('level').textContent = level;
+            document.getElementById('memMessage').textContent = "";
+            document.getElementById('memMessage').className = "message";
+            document.getElementById('restartMemBtn').style.display = "none";
+            document.getElementById('startMemBtn').style.display = "none";
+            document.querySelectorAll('.color-btn').forEach(b => b.disabled = false);
+            nextLevelMemory();
+        }
+
+        function nextLevelMemory() {
+            playerSeq = [];
+            sequence.push(colors[Math.floor(Math.random() * 4)]);
+            showSequence();
+        }
+
+        function showSequence() {
+            canClick = false;
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i >= sequence.length) {
+                    clearInterval(interval);
+                    canClick = true;
+                    document.getElementById('memMessage').textContent = "Твой ход!";
+                    document.getElementById('memMessage').className = "message hint";
+                    return;
+                }
+                const c = sequence[i];
+                const btn = document.getElementById(c);
+                btn.classList.add('active');
+                setTimeout(() => btn.classList.remove('active'), 400);
+                i++;
+            }, 700);
+        }
+
+        function handleColor(color) {
+            if (!canClick) return;
+            const btn = document.getElementById(color);
+            btn.classList.add('active');
+            setTimeout(() => btn.classList.remove('active'), 200);
+            playerSeq.push(color);
+
+            const i = playerSeq.length - 1;
+            if (playerSeq[i] !== sequence[i]) {
+                document.getElementById('memMessage').textContent = "❌ Ошибка! Игра окончена.";
+                document.getElementById('memMessage').className = "message lose";
+                canClick = false;
+                document.querySelectorAll('.color-btn').forEach(b => b.disabled = true);
+                document.getElementById('restartMemBtn').style.display = "block";
+                if (level > record) {
+                    record = level;
+                    document.getElementById('record').textContent = record;
+                }
+                return;
+            }
+
+            if (playerSeq.length === sequence.length) {
+                canClick = false;
+                document.getElementById('memMessage').textContent = "✅ Молодец! Следующий уровень...";
+                document.getElementById('memMessage').className = "message win";
+                level++;
+                document.getElementById('level').textContent = level;
+                setTimeout(() => nextLevelMemory(), 1000);
+            }
+        }
+    </script>
+</body>
+              </html>
